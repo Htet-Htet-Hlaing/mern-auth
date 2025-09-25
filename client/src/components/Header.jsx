@@ -1,15 +1,32 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { assets } from '../assets/assets'
+import { AppContent } from '../context/AppContent'
 
 const Header = () => {
+     const { userData } = useContext(AppContent);
   return (
-       <div className=' mt-20 p-4'>
-            <img src={assets.header_img} alt="" className=' w-36 h-36 rounded-full mb-6' />
-            <h1 className="">Hello Developer <img src={assets.hand_wave} className=' w-8 aspect-square' alt="" /></h1>
-            <h2>Welcome to our app</h2>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Magnam aut inventore voluptate cum velit deleniti maiores odio? Provident, amet quam quaerat modi reiciendis, ipsa unde maxime ad ab, iste quia.</p>
-       </div>
-  )
+    <div className=" flex flex-col items-center text-center text-gray-800 mt-20 px-4">
+      <img
+        src={assets.header_img}
+        alt=""
+        className=" w-36 h-36 rounded-full mb-6"
+      />
+      <h1 className=" flex items-center gap-2 text-xl sm:text-3xl font-medium mb-2">
+        Hello {userData ? userData.name : "Developer"}{" "}
+        <img src={assets.hand_wave} className=" w-8 aspect-square" alt="" />
+      </h1>
+      <h2 className=" text-3xl sm:text-5xl font-semibold mb-6">
+        Welcome to our app
+      </h2>
+      <p className="mb-6">
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Magnam aut
+        inventore voluptate cum velit deleniti maiores odio?
+      </p>
+      <button className=" border border-gray-500 rounded-full px-8 py-2 hover:bg-gray-100 transition-all">
+        Get Started
+      </button>
+    </div>
+  );
 }
 
 export default Header
