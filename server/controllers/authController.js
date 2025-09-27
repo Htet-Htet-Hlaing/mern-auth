@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import userModel from "../models/userModel.js";
 import transporter from "../config/nodemailer.js";
+import { EMAIL_VERIFY_TEMPLATE,PASSWORD_RESET_TEMPLATE } from "../config/emailTemplates.js";
 
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -117,7 +118,8 @@ export const sendVerifyOtp=async(req,res) => {
       from: process.env.SENDER_EMAIL,
       to: user.email,
       subject: "Account Verification OTP",
-      text:`Your OTP is ${otp}. Verify your account using this OTP.`
+      //text:`Your OTP is ${otp}. Verify your account using this OTP.`
+      html: EMAIL_VERIFY_TEMPLATE.replace("{{otp}}", otp).replace("{{email}}", user.email)
     }
     await transporter.sendMail(mailOption);
     res.json({ success: true, message: "Verification OTP sent on email" });
@@ -187,7 +189,8 @@ export const sendResetOtp = async (req, res) => {
       from: process.env.SENDER_EMAIL,
       to: user.email,
       subject: "Reset Password OTP",
-      text: `Your OTP for resetting your password is ${otp}. Use this OTP to proceed with resetting password`,
+      //text: `Your OTP for resetting your password is ${otp}. Use this OTP to proceed with resetting password`,
+      html:PASSWORD_RESET_TEMPLATE.replace("{{otp}}",otp).replace("{{email}}",user.email)
     };
 
     await transporter.sendMail(mailOption);
@@ -232,3 +235,32 @@ export const resetPassword = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 }
+
+export const deleteUser = async (req, res) => {
+  try {
+    const userId = req.body;
+    // 👆 assuming verifyToken middleware sets req.userId
+
+    // Find and delete the user
+    const deletedUser = await User.findByIdAndDelete(userId);
+
+    if (!deletedUser) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    res.clearCookie("jwt"); // 👈 optional: clear JWT cookie on deletion
+
+    return res.status(200).json({
+      success: true,
+      message: "User account deleted successfully",
+    });
+  } catch (error) {
+    console.error("❌ Error deleting user:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error, unable to delete user",
+    });
+  }
+};
